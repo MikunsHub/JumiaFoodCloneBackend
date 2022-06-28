@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Vendor,Country,Business_Type,Menu,Order
+from .models import Vendor,Country,Business_Type,Menu,Order,OrderItems
 
 
 class CountrySerializer(serializers.ModelSerializer):
@@ -34,18 +34,60 @@ class MenuSerializer(serializers.ModelSerializer):
             "price"
         ]
 
+class OrderItemsRetrieveSerializer(serializers.ModelSerializer):
+
+    Price = serializers.SerializerMethodField('get_price')
+
+    class Meta:
+        model = OrderItems
+        fields = ["menu","quantity","Price"]
+
+
+    def get_price(self,obj):
+        price = obj.menu.price
+        quantity = obj.quantity
+        return price * quantity
+
+
 class OrderSerializer(serializers.ModelSerializer):
-    # total_amt = serializers.SerializerMethodField(method_name='get_total_amt')
+    
+    item = OrderItemsRetrieveSerializer(
+        many=True,
+        source='orderitems_set',
+        )
+
+    class Meta:
+        model = Order
+        fields = (
+            "id",
+            "status",
+            "item",
+            "total_amount"
+        )
+        
+    
+    def create(self, validated_data):
+        
+        items_data = validated_data.pop('orderitems_set')
+        order = Order.objects.create(**validated_data)
+        
+        for item in items_data:
+            order.orderitems_set.create(**item)      
+
+        return order
+
+class OrderRetrieveSerializer(serializers.ModelSerializer):
+    quantity = OrderItemsRetrieveSerializer(
+        many=True,
+        source='orderitems_set'
+        )
     class Meta:
         model = Order
         fields = [
+            "id",
             "status",
-            "items",
-            # "total_amt"
+            "quantity",
+            "total_amount",
         ]
         depth = 1
-
-    # def get_total_amt(self,instance):
-    #     request = self.context.get('request')
-    #     model.items
 

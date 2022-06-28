@@ -3,6 +3,13 @@ from django.db import models
 from django.db import models
 from user.models import  User
 
+status_choices = (
+    ("ordered", "ordered"),
+    ("pending", "pending"),
+    ("delivered", "delivered")
+)
+
+
 #country and business_type can be simple choices
 class Country(models.Model):
     country_name = models.CharField(max_length=80)
@@ -40,29 +47,24 @@ class Menu(models.Model):
     def __str__(self):
         return f"{self.meal_name}"
 
-status_choices = (
-    ("ordered", "ordered"),
-    ("pending", "pending"),
-    ("delivered", "delivered")
-)
-
 class Order(models.Model):
     status = models.CharField(max_length=30,choices=status_choices,default=status_choices[0][1])
-    timestamp = models.DateTimeField(auto_now_add=True) #not sure
     customer = models.ForeignKey(User,on_delete=models.CASCADE)
-    items = models.ManyToManyField(Menu, related_name="order_items")
-    
+    items = models.ManyToManyField(Menu,through='OrderItems')
+    total_amount = models.FloatField(default=0.0)
+    timestamp = models.DateTimeField(auto_now_add=True)
+ 
+
+class OrderItems(models.Model):
+    order = models.ForeignKey(Order,on_delete=models.CASCADE)
+    menu = models.ForeignKey(Menu,on_delete=models.CASCADE)
+    quantity =models.IntegerField(default=1)
 
     
-
-# class OrderItems(models.Model):
-#     order = models.ManyToManyField(Order, related_name="order_items")
-#     quantity = models.IntegerField()
-#     items = models.ForeignKey(Menu,on_delete=models.CASCADE)
-
-
 # class Payment(models.Model):
 #     pass
+
+
 
 class Driver(models.Model):
     first_name = models.CharField(max_length=20)
@@ -78,3 +80,4 @@ class Delivery(models.Model):
     driver = models.ForeignKey(Driver,on_delete=models.CASCADE)
     order = models.ForeignKey(Order,on_delete=models.CASCADE)
     delivery_time = models.DateTimeField()
+    # status

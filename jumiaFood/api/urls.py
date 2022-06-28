@@ -4,7 +4,10 @@ from .views import (
     Business_TypeCreateListApiView,
     VendorCreateListApiView,
     MenuCreateListApiView,
-    OrderCreateListApiView
+    OrderCreateListApiView,
+    OrderUpdateApiView,
+    OrderRetrieveApiView,
+    OrderDeleteApiView
 )
 
 urlpatterns = [
@@ -13,4 +16,7 @@ urlpatterns = [
     path('vendor/',VendorCreateListApiView.as_view()),
     path('menu/',MenuCreateListApiView.as_view()),
     path('order/',OrderCreateListApiView.as_view()),
+    path('<int:pk>/order/',OrderUpdateApiView.as_view()),
+    path('order/<int:pk>/',OrderRetrieveApiView.as_view()),
+    path('order/<int:pk>/delete/',OrderDeleteApiView.as_view()),
 ]
