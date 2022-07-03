@@ -67,17 +67,16 @@ class OrderItems(models.Model):
 
 
 class Driver(models.Model):
-    first_name = models.CharField(max_length=20)
-    last_name = models.CharField(max_length=20)
-    email = models.EmailField()
+    user = models.OneToOneField(User,on_delete=models.CASCADE,primary_key=True)
     address = models.CharField(max_length=100)
-    phone = models.CharField(max_length=20)
-    dob = models.DateTimeField()
     vehicle_type = models.CharField(max_length=20)
-    driver_license = models.FileField()
+    driver_license = models.CharField(max_length=20) #make file field later
 
-class Delivery(models.Model):
-    driver = models.ForeignKey(Driver,on_delete=models.CASCADE)
-    order = models.ForeignKey(Order,on_delete=models.CASCADE)
-    delivery_time = models.DateTimeField()
+    def __str__(self):
+        return f"{self.user.email}"
+
+# class Delivery(models.Model):
+#     driver = models.ForeignKey(Driver,on_delete=models.CASCADE)
+#     order = models.ForeignKey(Order,on_delete=models.CASCADE)
+#     delivery_time = models.DateTimeField()
     # status

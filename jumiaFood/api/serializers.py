@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Vendor,Country,Business_Type,Menu,Order,OrderItems
+from .models import Vendor,Country,Business_Type,Menu,Order,OrderItems,Driver
 
 
 class CountrySerializer(serializers.ModelSerializer):
@@ -90,4 +90,5 @@ class OrderRetrieveSerializer(serializers.ModelSerializer):
             "total_amount",
         ]
         depth = 1
+
 
