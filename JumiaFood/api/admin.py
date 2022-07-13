@@ -8,5 +8,7 @@ admin.site.register([
     OrderItems,
     Menu,
     Driver,
-    # Delivery,
+    Customer,
+    Delivery,
+    Delivery_accept,
     Vendor])

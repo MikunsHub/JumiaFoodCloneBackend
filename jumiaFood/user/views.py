@@ -4,37 +4,30 @@ from rest_framework import generics
 from rest_framework.response import Response
 
 from .models import User
-from .serializers import  UserSerializer, DriverRegisterSerializer
+from .serializers import DriverRegisterSerializer,CustomerRegisterSerializer
 
-# class RegisterView(generics.ListCreateAPIView):
-#     # permission_classes = (IsAuthenticated)
-#     queryset = User.objects.all()
-#     serializer_class = UserSerializer
-#     def post(self,request):
-#         serializer = UserSerializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         serializer.save()
-#         return Response(serializer.data)
-
-class RegisterView(generics.GenericAPIView):
+class CustomerRegisterView(generics.GenericAPIView):
     # permission_classes = (IsAuthenticated)
-    # queryset = User.objects.all()
+
+    serializer_class = CustomerRegisterSerializer
+    def post(self,request,*args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        driver = serializer.save()
+        driver_data = CustomerRegisterSerializer(driver, context=self.get_serializer_context()).data
+        return Response(serializer.data)
+
+class DriverRegisterView(generics.GenericAPIView):
+    # permission_classes = (IsAuthenticated)
+    
     serializer_class = DriverRegisterSerializer
     def post(self,request,*args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         driver = serializer.save()
+        print(driver)
         driver_data = DriverRegisterSerializer(driver, context=self.get_serializer_context()).data
+        print(driver_data)
+        print(serializer.data)
         return Response(serializer.data)
 
-# def post(self, request, *args, **kwargs):
-#         serializer = self.get_serializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         individual = serializer.save()
-#         individual_data = IndividualSerializer(individual, context=self.get_serializer_context()).data
-        
-#         return Response({
-#              "individual": individual_data,
-#              "username": individual.user.username,
-#              "token": AuthToken.objects.create(individual.user)[1]
-#         })

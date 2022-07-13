@@ -4,8 +4,8 @@ from django.db import models
 from user.models import  User
 
 status_choices = (
-    ("ordered", "ordered"),
     ("pending", "pending"),
+    ("in_transit", "in_transit"),
     ("delivered", "delivered")
 )
 
@@ -48,7 +48,7 @@ class Menu(models.Model):
         return f"{self.meal_name}"
 
 class Order(models.Model):
-    status = models.CharField(max_length=30,choices=status_choices,default=status_choices[0][1])
+    status = models.CharField(max_length=30,choices=status_choices,default=status_choices[0][0])
     customer = models.ForeignKey(User,on_delete=models.CASCADE)
     items = models.ManyToManyField(Menu,through='OrderItems')
     total_amount = models.FloatField(default=0.0)
@@ -64,8 +64,6 @@ class OrderItems(models.Model):
 # class Payment(models.Model):
 #     pass
 
-
-
 class Driver(models.Model):
     user = models.OneToOneField(User,on_delete=models.CASCADE,primary_key=True)
     address = models.CharField(max_length=100)
@@ -73,10 +71,36 @@ class Driver(models.Model):
     driver_license = models.CharField(max_length=20) #make file field later
 
     def __str__(self):
+        return f"Email:{self.user.email} Id:{self.pk}"
+
+class Customer(models.Model):
+    user = models.OneToOneField(User,on_delete=models.CASCADE,primary_key=True)
+    dob = models.DateField()
+    # location_ordered
+
+    def __str__(self):
         return f"{self.user.email}"
 
-# class Delivery(models.Model):
-#     driver = models.ForeignKey(Driver,on_delete=models.CASCADE)
-#     order = models.ForeignKey(Order,on_delete=models.CASCADE)
-#     delivery_time = models.DateTimeField()
-    # status
+deliveryOrderChoices = (
+    ("pending", "pending"),
+    ("delivered", "delivered")
+)
+
+class Delivery(models.Model):
+    order = models.ForeignKey(Order,on_delete=models.CASCADE)
+    delivery_time = models.DateTimeField(auto_now_add=True)
+    delivery_status = models.CharField(max_length=30,choices=deliveryOrderChoices,default=deliveryOrderChoices[0][0])
+
+driverOrderChoices = (
+    ("pending", "pending"),
+    ("accepted", "accepted"),
+    ("cancelled", "cancelled")
+)
+
+class Delivery_accept(models.Model):
+    delivery = models.ForeignKey(Delivery,on_delete=models.CASCADE)
+    driver = models.ForeignKey(Driver,on_delete=models.CASCADE)
+    driver_status = models.CharField(max_length=30,choices=driverOrderChoices,default=driverOrderChoices[0][0])
+
+    def __str__(self):
+        return f"{self.driver.user.email}"
