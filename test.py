@@ -1,29 +1,13 @@
-# nums = [45,22,14,65,97,72]
-# for i in range(len(nums)):
-#     if nums[i] % 3 == 0 and nums[i] % 5 == 0:
-#         nums[i] = 'fizzbuzz'
-#     elif  nums[i] % 3 == 0:
-#         nums[i] = 'fuzz'
-#     elif nums[i] % 5 == 0:
-#         nums[i] = 'buzz'
-# print(nums)
+import googlemaps
+from datetime import datetime
 
-# for x in range(6):
-#     if x == 3: continue
-#     if x == 6: break
-#     print(x)
+gmaps = googlemaps.Client(key='AIzaSyBFvfjJKHSyjobRHph9hIBySCDDkC9kbXE')
 
+# Geocoding an address
+geocode_result = gmaps.distance_matrix(
+        origins=['7.392130,3.839928'],
+        destinations=['7.427063,3.901437','7.404383,3.910375']
+    )
 
-password = input('Password must be strong with a capital and symbol:')
+print(geocode_result)
 
-for i in password:
- if i.isupper() or  i.isdigit():
-     print('valid')
-     break
- else:
-     print('password at least  a capital letter and a number')   
- break
- print(password)
-
-
-    
