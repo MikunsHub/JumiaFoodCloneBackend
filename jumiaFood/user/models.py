@@ -41,6 +41,9 @@ class User(AbstractUser):
     email = models.EmailField(max_length=255, unique=True)
     password = models.CharField(max_length=200)
     phone_number = PhoneNumberField(null=False,unique=True)
+    is_customer = models.BooleanField(default=False)
+    is_driver = models.BooleanField(default=False)
+
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'phone_number']

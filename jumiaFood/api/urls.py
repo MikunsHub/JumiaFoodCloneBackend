@@ -7,7 +7,10 @@ from .views import (
     OrderCreateListApiView,
     OrderUpdateApiView,
     OrderRetrieveApiView,
-    OrderDeleteApiView
+    OrderDeleteApiView,
+    DeliveryRetrieveView,
+    DeliveryAcceptCreateView,
+    OrderCompleteApiView
 )
 
 urlpatterns = [
@@ -19,4 +22,7 @@ urlpatterns = [
     path('<int:pk>/order/',OrderUpdateApiView.as_view()),
     path('order/<int:pk>/',OrderRetrieveApiView.as_view()),
     path('order/<int:pk>/delete/',OrderDeleteApiView.as_view()),
+    path('delivery/',DeliveryRetrieveView.as_view()),
+    path('delivery/driver',DeliveryAcceptCreateView.as_view()),
+    path('delivery/<int:pk>/order/',OrderCompleteApiView.as_view()),
 ]

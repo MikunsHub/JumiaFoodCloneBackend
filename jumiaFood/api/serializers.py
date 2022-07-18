@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Vendor,Country,Business_Type,Menu,Order,OrderItems
+from .models import Vendor,Country,Business_Type,Menu,Order,OrderItems,Delivery,Delivery_accept
 
 
 class CountrySerializer(serializers.ModelSerializer):
@@ -73,7 +73,7 @@ class OrderSerializer(serializers.ModelSerializer):
         
         for item in items_data:
             order.orderitems_set.create(**item)      
-
+        print(order.id)
         return order
 
 class OrderRetrieveSerializer(serializers.ModelSerializer):
@@ -91,3 +91,23 @@ class OrderRetrieveSerializer(serializers.ModelSerializer):
         ]
         depth = 1
 
+class DeliverySerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Delivery
+        fields = [
+            "id",
+            "order",
+            "delivery_status",
+        ]
+
+class DeliveryAcceptSerializer(serializers.ModelSerializer):
+    # order = DeliverySerializer()
+    class Meta:
+        model = Delivery_accept
+        fields = [
+            "id",
+            "delivery",
+            "driver",
+            "driver_status",
+        ]

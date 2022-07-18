@@ -2,9 +2,13 @@ from django.shortcuts import render
 
 from rest_framework import generics
 from rest_framework.response import Response
+from rest_framework.permissions  import IsAuthenticated
 
 from .models import  *
 from .serializers import  *
+from .decorators import Customer_required
+from .permissions import CustomerViewOnly
+from .utils import create_delivery,update_order_status,order_complete_status
 
 class CountryCreateListApiView(generics.ListCreateAPIView):
 
@@ -36,6 +40,7 @@ class Business_TypeCreateListApiView(generics.ListCreateAPIView):
         return Response(data=serializer.data)
 
 class VendorCreateListApiView(generics.ListCreateAPIView):
+    permission_classes = (IsAuthenticated)
 
     serializer_class = VendorSerializer
     queryset = Vendor.objects.all()
@@ -53,6 +58,8 @@ class VendorCreateListApiView(generics.ListCreateAPIView):
         return Response(serializer.data)
 
 class MenuCreateListApiView(generics.ListCreateAPIView):
+    # permission_classes = (IsAuthenticated)
+    permission_classes = [IsAuthenticated,CustomerViewOnly]
 
     serializer_class = MenuSerializer
     queryset = Menu.objects.all()
@@ -71,12 +78,13 @@ class MenuCreateListApiView(generics.ListCreateAPIView):
 
 
 class OrderCreateListApiView(generics.ListCreateAPIView):
-
+    permission_classes = (IsAuthenticated,)
+    
+    
     serializer_class = OrderSerializer
     queryset = Order.objects.all()
 
-    def get(self,request):
-        
+    def get(self,request):    
         order = Order.objects.all()
         serializer = self.serializer_class(instance=order,many=True)
         return Response(data=serializer.data)
@@ -99,12 +107,15 @@ class OrderCreateListApiView(generics.ListCreateAPIView):
 
         if serializer.is_valid():
             serializer.save(customer=user,total_amount=total_amount)
+            create_delivery(order_id = serializer.data["id"])
             return Response(data=serializer.data)
+            
         return Response(data=serializer.errors)
 
 
 class OrderUpdateApiView(generics.UpdateAPIView):
-    
+    permission_classes = (IsAuthenticated,)
+
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     lookup_field = 'pk'
@@ -122,16 +133,68 @@ class OrderUpdateApiView(generics.UpdateAPIView):
             return Response({"message":"order did not update"})
 
 class OrderRetrieveApiView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated,CustomerViewOnly]
+    
     
     queryset = Order.objects.all()
     serializer_class = OrderRetrieveSerializer
     lookup_field = 'pk'
 
 class OrderDeleteApiView(generics.DestroyAPIView):
-    
+    permission_classes = (IsAuthenticated,)
+
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     lookup_field = 'pk'
 
-
+class DeliveryRetrieveView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
     
+    serializer_class = DeliverySerializer
+
+    def get(self,request):    
+        order = Delivery.objects.filter(delivery_status="pending")
+        serializer = self.serializer_class(instance=order,many=True)
+        return Response(data=serializer.data)
+
+
+class DeliveryAcceptCreateView(generics.ListCreateAPIView):
+    serializer_class = DeliveryAcceptSerializer
+    queryset = Delivery_accept.objects.all()
+
+    def post(self,request):
+        serializer = DeliveryAcceptSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        print(serializer.data)
+        data = serializer.data
+        update_order_status(data['delivery'])
+
+        return Response(serializer.data)
+
+
+#another endpoint for the driver to show that they have completed
+#the order
+
+class OrderCompleteApiView(generics.UpdateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    queryset = Delivery.objects.all()
+    serializer_class = DeliverySerializer #serializer for delivery
+    lookup_field = 'pk'
+
+
+    def update(self, request,*args,**kwargs):
+        instance = self.get_object()
+        print(instance)
+        serializer = self.get_serializer(instance, data=request.data,partial= True)
+
+        if serializer.is_valid():
+            serializer.save()
+            data = serializer.data
+            print(data)
+            order_complete_status(data['id'])
+            return Response({"message":"delivery has been updated"})
+
+        else:
+            return Response({"message":"delivery did not update"})
